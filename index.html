@@ -1,0 +1,581 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iPhone Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            user-select: none;
+        }
+
+        .calculator {
+            width: 400px;
+            height: 850px;
+            background: #000;
+            border-radius: 45px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        /* Dynamic Island */
+        .dynamic-island {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dynamic-island .camera {
+            width: 10px;
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            border: 1px solid #2a2a3e;
+        }
+
+        .dynamic-island .sensor {
+            width: 30px;
+            height: 6px;
+            background: #1a1a2e;
+            border-radius: 3px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 20px 10px 10px 10px;
+            margin-top: 30px;
+            min-height: 200px;
+        }
+
+        .display .expression {
+            color: #8e8e93;
+            font-size: 28px;
+            font-weight: 300;
+            min-height: 40px;
+            word-break: break-all;
+            text-align: right;
+            width: 100%;
+            padding-right: 5px;
+        }
+
+        .display .result {
+            color: #fff;
+            font-size: 64px;
+            font-weight: 300;
+            min-height: 80px;
+            word-break: break-all;
+            text-align: right;
+            width: 100%;
+            padding-right: 5px;
+            transition: font-size 0.2s ease;
+        }
+
+        .display .result.small {
+            font-size: 48px;
+        }
+
+        .display .result.smaller {
+            font-size: 36px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 10px 0;
+            flex: 2;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 50%;
+            font-size: 32px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1;
+            color: #fff;
+            position: relative;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+        .btn-number {
+            background: #333;
+        }
+
+        .btn-number:hover {
+            background: #3a3a3a;
+        }
+
+        .btn-operator {
+            background: #f1a33c;
+        }
+
+        .btn-operator:hover {
+            background: #f5b85a;
+        }
+
+        .btn-operator.active {
+            background: #fff;
+            color: #f1a33c;
+        }
+
+        .btn-function {
+            background: #a5a5a5;
+            color: #000;
+        }
+
+        .btn-function:hover {
+            background: #b5b5b5;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+            border-radius: 50px;
+            justify-content: flex-start;
+            padding-left: 28px;
+            aspect-ratio: auto;
+            height: 100%;
+        }
+
+        .btn-equals {
+            background: #f1a33c;
+        }
+
+        .btn-equals:hover {
+            background: #f5b85a;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 440px) {
+            .calculator {
+                width: 100%;
+                height: 100vh;
+                max-height: 850px;
+                border-radius: 0;
+                padding: 15px;
+            }
+
+            .dynamic-island {
+                top: 10px;
+                width: 100px;
+                height: 30px;
+            }
+
+            .display .result {
+                font-size: 56px;
+            }
+
+            .display .result.small {
+                font-size: 42px;
+            }
+
+            .display .result.smaller {
+                font-size: 32px;
+            }
+
+            .btn {
+                font-size: 28px;
+            }
+
+            .btn-zero {
+                padding-left: 24px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .calculator {
+                padding: 10px;
+            }
+
+            .buttons {
+                gap: 8px;
+            }
+
+            .btn {
+                font-size: 24px;
+            }
+
+            .display .result {
+                font-size: 48px;
+            }
+
+            .display .result.small {
+                font-size: 36px;
+            }
+
+            .display .result.smaller {
+                font-size: 28px;
+            }
+
+            .display .expression {
+                font-size: 22px;
+            }
+        }
+
+        /* Scrollbar hide */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <!-- Dynamic Island -->
+        <div class="dynamic-island">
+            <div class="camera"></div>
+            <div class="sensor"></div>
+        </div>
+
+        <!-- Display -->
+        <div class="display">
+            <div class="expression" id="expression"></div>
+            <div class="result" id="result">0</div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="buttons">
+            <button class="btn btn-function" data-value="AC">AC</button>
+            <button class="btn btn-function" data-value="±">±</button>
+            <button class="btn btn-function" data-value="%">%</button>
+            <button class="btn btn-operator" data-value="÷">÷</button>
+
+            <button class="btn btn-number" data-value="7">7</button>
+            <button class="btn btn-number" data-value="8">8</button>
+            <button class="btn btn-number" data-value="9">9</button>
+            <button class="btn btn-operator" data-value="×">×</button>
+
+            <button class="btn btn-number" data-value="4">4</button>
+            <button class="btn btn-number" data-value="5">5</button>
+            <button class="btn btn-number" data-value="6">6</button>
+            <button class="btn btn-operator" data-value="−">−</button>
+
+            <button class="btn btn-number" data-value="1">1</button>
+            <button class="btn btn-number" data-value="2">2</button>
+            <button class="btn btn-number" data-value="3">3</button>
+            <button class="btn btn-operator" data-value="+">+</button>
+
+            <button class="btn btn-number btn-zero" data-value="0">0</button>
+            <button class="btn btn-number" data-value=".">.</button>
+            <button class="btn btn-operator btn-equals" data-value="=">=</button>
+        </div>
+    </div>
+
+    <script>
+        // Calculator logic
+        class Calculator {
+            constructor() {
+                this.display = document.getElementById('result');
+                this.expressionDisplay = document.getElementById('expression');
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operation = null;
+                this.shouldResetInput = false;
+                this.expression = '';
+                this.lastResult = null;
+                this.justEvaluated = false;
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const value = button.dataset.value;
+                        this.handleInput(value);
+                        this.updateDisplay();
+                    });
+                });
+
+                // Keyboard support
+                document.addEventListener('keydown', (e) => {
+                    const keyMap = {
+                        '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+                        '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+                        '.': '.', '+': '+', '-': '−', '*': '×', '/': '÷',
+                        'Enter': '=', '=': '=', 'Escape': 'AC', 'Backspace': 'AC'
+                    };
+                    const value = keyMap[e.key];
+                    if (value) {
+                        e.preventDefault();
+                        this.handleInput(value);
+                        this.updateDisplay();
+                    }
+                });
+            }
+
+            handleInput(value) {
+                if (value === 'AC') {
+                    this.clear();
+                    return;
+                }
+
+                if (value === '±') {
+                    this.toggleSign();
+                    return;
+                }
+
+                if (value === '%') {
+                    this.percentage();
+                    return;
+                }
+
+                if (this.isOperator(value)) {
+                    this.handleOperator(value);
+                    return;
+                }
+
+                if (value === '=') {
+                    this.evaluate();
+                    return;
+                }
+
+                if (value === '.') {
+                    this.handleDecimal();
+                    return;
+                }
+
+                // Number input
+                this.handleNumber(value);
+            }
+
+            isOperator(value) {
+                return ['+', '−', '×', '÷'].includes(value);
+            }
+
+            clear() {
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operation = null;
+                this.shouldResetInput = false;
+                this.expression = '';
+                this.lastResult = null;
+                this.justEvaluated = false;
+                document.querySelectorAll('.btn-operator').forEach(btn => btn.classList.remove('active'));
+            }
+
+            toggleSign() {
+                if (this.currentInput !== '0') {
+                    if (this.currentInput.startsWith('-')) {
+                        this.currentInput = this.currentInput.slice(1);
+                    } else {
+                        this.currentInput = '-' + this.currentInput;
+                    }
+                }
+            }
+
+            percentage() {
+                const num = parseFloat(this.currentInput);
+                if (!isNaN(num)) {
+                    this.currentInput = String(num / 100);
+                }
+            }
+
+            handleOperator(operator) {
+                const current = parseFloat(this.currentInput);
+                
+                if (this.operation && !this.shouldResetInput) {
+                    this.evaluate();
+                }
+
+                this.previousInput = this.currentInput;
+                this.operation = operator;
+                this.shouldResetInput = true;
+                this.justEvaluated = false;
+
+                // Update expression
+                this.expression = this.currentInput + ' ' + this.getOperatorSymbol(operator) + ' ';
+                document.querySelectorAll('.btn-operator').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === operator);
+                });
+            }
+
+            getOperatorSymbol(operator) {
+                const map = { '+': '+', '−': '−', '×': '×', '÷': '÷' };
+                return map[operator] || operator;
+            }
+
+            handleDecimal() {
+                if (this.shouldResetInput) {
+                    this.currentInput = '0';
+                    this.shouldResetInput = false;
+                }
+                if (!this.currentInput.includes('.')) {
+                    this.currentInput += '.';
+                }
+            }
+
+            handleNumber(value) {
+                if (this.justEvaluated) {
+                    this.clear();
+                    this.justEvaluated = false;
+                }
+
+                if (this.shouldResetInput) {
+                    this.currentInput = '0';
+                    this.shouldResetInput = false;
+                }
+
+                if (this.currentInput === '0' && value !== '.') {
+                    this.currentInput = value;
+                } else {
+                    // Limit input length
+                    if (this.currentInput.replace('-', '').replace('.', '').length < 15) {
+                        this.currentInput += value;
+                    }
+                }
+            }
+
+            evaluate() {
+                const current = parseFloat(this.currentInput);
+                const previous = parseFloat(this.previousInput);
+                
+                if (isNaN(previous) || isNaN(current)) {
+                    return;
+                }
+
+                let result;
+                switch (this.operation) {
+                    case '+':
+                        result = previous + current;
+                        break;
+                    case '−':
+                        result = previous - current;
+                        break;
+                    case '×':
+                        result = previous * current;
+                        break;
+                    case '÷':
+                        if (current === 0) {
+                            this.currentInput = 'Error';
+                            this.expression = '';
+                            this.operation = null;
+                            this.previousInput = '';
+                            this.shouldResetInput = true;
+                            this.justEvaluated = true;
+                            return;
+                        }
+                        result = previous / current;
+                        break;
+                    default:
+                        return;
+                }
+
+                // Format result
+                if (Number.isInteger(result)) {
+                    this.currentInput = String(result);
+                } else {
+                    // Limit decimal places
+                    const rounded = Math.round(result * 1e10) / 1e10;
+                    this.currentInput = String(rounded);
+                }
+
+                this.expression = this.previousInput + ' ' + this.getOperatorSymbol(this.operation) + ' ' + 
+                                 this.currentInput + ' =';
+                this.operation = null;
+                this.previousInput = '';
+                this.shouldResetInput = true;
+                this.justEvaluated = true;
+                document.querySelectorAll('.btn-operator').forEach(btn => btn.classList.remove('active'));
+
+                // Send to server for logging (optional)
+                this.sendToServer(this.expression);
+            }
+
+            sendToServer(expression) {
+                // Optional: Send calculation to server for logging or advanced features
+                fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ expression: expression.replace('=', '').trim() })
+                }).catch(err => console.log('Server logging disabled'));
+            }
+
+            updateDisplay() {
+                // Format display number
+                let displayValue = this.currentInput;
+                
+                // Handle error
+                if (displayValue === 'Error') {
+                    this.display.textContent = 'Error';
+                    this.display.className = 'result';
+                    this.expressionDisplay.textContent = '';
+                    return;
+                }
+
+                // Format large numbers
+                if (displayValue.length > 12) {
+                    const num = parseFloat(displayValue);
+                    if (!isNaN(num)) {
+                        displayValue = num.toExponential(6);
+                    }
+                }
+
+                this.display.textContent = displayValue;
+                this.expressionDisplay.textContent = this.expression;
+
+                // Adjust font size for long numbers
+                const length = displayValue.length;
+                this.display.className = 'result';
+                if (length > 10) {
+                    this.display.classList.add('smaller');
+                } else if (length > 7) {
+                    this.display.classList.add('small');
+                }
+            }
+        }
+
+        // Initialize calculator
+        const calculator = new Calculator();
+
+        // Prevent zoom on double tap
+        document.addEventListener('touchend', (e) => {
+            if (e.target.closest('.btn')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
